@@ -3,78 +3,87 @@ Proyecto de Analítica Descriptiva
 
 ---
 
-## Descripción del Proyecto
+## Descripción
 
-Sistema de inteligencia inmobiliaria para una startup PropTech, construido a partir de datos reales del mercado de departamentos en venta de CABA. El proyecto cubre el ciclo completo de Knowledge Discovery in Databases (KDD): desde la extracción bruta de datos hasta la generación de insights accionables para la toma de decisiones de inversión.
+Proyecto integrador de Analítica Descriptiva. Analizamos el mercado de departamentos en venta en CABA usando datos reales extraídos de Argenprop mediante web scraping, cruzados con datos de Airbnb y fuentes públicas de Buenos Aires.
 
-**Cliente:** Startup PropTech enfocada en flipping inmobiliario, generación de renta y detección de zonas emergentes.
+El objetivo es construir una base analítica para una startup PropTech que busca detectar oportunidades de inversión: flipping inmobiliario, generación de renta y zonas emergentes.
 
-**Dataset principal:** 18.128 departamentos en venta extraídos de Argenprop mediante web scraping.
-
-## Estructura del Repositorio
+## Estructura
 
 ```
-real-estate-analytics/
-├── README.md                          # Este archivo
+Real-estate-analytics/
 ├── data/
-│   └── raw/                           # Datos crudos (sin procesar)
-│       ├── dataset_argenprop_completo.csv
-│       └── argenprop_export_*.tsv
+│   └── raw/
+│       ├── dataset_argenprop_completo.csv   # 18.128 deptos en venta
+│       └── airbnb_listings.csv              # 27.348 listings Airbnb CABA
 ├── notebooks/
-│   └── 01_extraccion_y_validacion.py  # Evidencia del scraping y validación
+│   └── 01_extraccion_y_validacion.ipynb     # Evidencia scraping + análisis
 ├── src/
-│   ├── scrapper.py                    # Scraper base (provisto por cátedra)
-│   └── scrapper_v2.py                 # Scraper mejorado por el equipo
+│   ├── scrapper_base.py                     # Script original de cátedra
+│   └── scrapper_v2.py                       # Versión optimizada del equipo
 ├── docs/
-│   ├── TP1_PreEntrega.pdf             # Informe Pre-Entrega 1
-│   └── *.png                          # Gráficos generados
-└── .gitignore
+│   └── TP1_PreEntrega.pdf
+├── output/                                  # Generado por el scrapper
+├── .gitignore
+└── README.md
 ```
 
-## Dataset
+## Datasets
 
-| Atributo | Detalle |
-|----------|---------|
+### Argenprop (fuente principal)
+
+| | |
+|---|---|
 | **Fuente** | [Argenprop](https://www.argenprop.com) |
-| **Método** | Web Scraping (Python: requests + BeautifulSoup + Pandas) |
 | **Registros** | 18.128 departamentos únicos |
-| **Variables** | 28 columnas (textuales, numéricas, ordinales, dicotómicas) |
+| **Variables** | 28 columnas |
 | **Cobertura** | 21 barrios de CABA |
-| **Representatividad** | ~23% del stock publicado en CABA |
-| **Geocodificación** | 98,2% de registros con lat/long |
+| **Representatividad** | ~23% del stock publicado |
+| **Link** | https://www.argenprop.com/departamentos/venta/capital-federal |
 
-### Variables capturadas
+### Inside Airbnb (fuente complementaria)
 
-- **Identificación:** Precio, Expensas, Calle, Altura, Piso, Barrio, Lat, Long, Link
-- **Numéricas:** Dormitorios, Baños, Ambientes, Antigüedad, Sup_Cubierta_m2, Sup_Total_m2
-- **Textuales:** Descripción (texto libre), Detalles, Características
-- **Smart Features (0/1):** Amenities, Losa_Central, Aire_Acond, Apto_Credito, Cochera, Seguridad, Luminoso, Balcon_Aterrazado, A_Estrenar
+| | |
+|---|---|
+| **Fuente** | [Inside Airbnb](https://insideairbnb.com/buenos-aires) |
+| **Registros** | 27.348 listings |
+| **Cobertura** | 48 barrios de CABA |
+| **Uso** | Índice de Presión Airbnb, Rentabilidad Bruta |
+| **Link** | https://insideairbnb.com/buenos-aires |
 
+## Mejoras del scrapper
 
-## KPIs Definidos
+El script base de cátedra entra a cada aviso individual para sacar la descripción completa (~20 requests extra por página → horas de ejecución). Nuestra versión extrae todo desde la card del listado: **1 request por página**, 15 Smart Features (vs 8), logging, reintentos, CLI configurable.
+
+```bash
+# Test rápido (~5 seg)
+python src/scrapper_v2.py --pages 2 --barrios palermo
+
+# Completo (~30 min)
+python src/scrapper_v2.py
+```
+
+## KPIs
 
 | KPI | Fórmula |
 |-----|---------|
-| Precio mediano m² por barrio | `mediana(precio_usd / sup_m2)` por barrio |
+| Precio mediano m²/barrio | `mediana(precio_usd / sup_m2)` por barrio |
 | Gap de Flipping | `(med_m2_estrenar − med_m2_refac) / med_m2_refac × 100` |
-| Rentabilidad Bruta (Yield) | `(Alquiler_mensual × 12) / Precio_compra × 100` |
+| Rentabilidad Bruta | `(Alquiler_mensual × 12) / Precio_compra × 100` |
 | Score de Subvaluación | `(precio_pub − precio_AVM) / precio_AVM × 100` |
-| Coef. Variación de Precios | `(std_m2 / media_m2) × 100` por barrio |
+| Coef. Variación | `(std_m2 / media_m2) × 100` por barrio |
+| Índice Presión Airbnb | `listings_airbnb / deptos_venta` por barrio |
 
-## Cronograma
+## Fuentes externas planificadas (Fase 3)
 
-| Entrega | Fecha | Contenido |
-|---------|-------|-----------|
-| **Pre-Entrega 1** | 15/04 | Definición, scraping, hipótesis |
-| Pre-Entrega 2 | 13/05 | Limpieza, EDA, validación estadística |
-| Pre-Entrega 3 | 10/06 | Clustering, PCA, cruces espaciales |
-| TP Final | 18/06 | Dashboard, presentación ejecutiva |
+- [BA Data — Estaciones de Subte](https://data.buenosaires.gob.ar)
+- [BA Data — Espacios Verdes](https://data.buenosaires.gob.ar)
+- [BA Data — Comisarías](https://data.buenosaires.gob.ar)
+- [BA Data — Barrios GeoJSON](https://data.buenosaires.gob.ar)
+- [CAC — Costo de construcción](https://www.camarco.org.ar)
 
-## Fuentes Externas (Fase 3)
-
-- [Inside Airbnb — Buenos Aires](https://insideairbnb.com/buenos-aires)
-- [BA Data — Datos Abiertos GCBA](https://data.buenosaires.gob.ar)
-- [Cámara Argentina de la Construcción](https://www.camarco.org.ar)
 
 ## Equipo
-Catalina Bachetti, Simon Volpato Escandarani y Matias Fleischer
+
+Catalina Bachetti, Simón Volpato Escandarani y Matías Fleischer
