@@ -21,7 +21,7 @@ Real-estate-analytics/
 │   └── 01_extraccion_y_validacion.ipynb     # Evidencia scraping + análisis
 ├── src/
 │   ├── scrapper_base.py                     # Script original de cátedra
-│   └── scrapper_v2.py                       # Versión optimizada del equipo
+│   └──                                      # Versión optimizada del equipo
 ├── docs/
 │   └── TP1_PreEntrega.pdf
 ├── output/                                  # Generado por el scrapper
@@ -54,15 +54,7 @@ Real-estate-analytics/
 
 ## Mejoras del scrapper
 
-El script base de cátedra entra a cada aviso individual para sacar la descripción completa (~20 requests extra por página → horas de ejecución). Nuestra versión extrae todo desde la card del listado: **1 request por página**, 15 Smart Features (vs 8), logging, reintentos, CLI configurable.
-
-```bash
-# Test rápido (~5 seg)
-python src/scrapper_v2.py --pages 2 --barrios palermo
-
-# Completo (~30 min)
-python src/scrapper_v2.py
-```
+----
 
 ## KPIs
 
